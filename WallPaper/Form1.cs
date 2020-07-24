@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices;
+using System.Media;
 using System.Windows.Forms;
 using System.Windows.Interop;
 using System.Drawing;
+using System.Windows.Media;
+using Color = System.Drawing.Color;
 
 namespace WallPaper
 {
@@ -14,43 +12,57 @@ namespace WallPaper
     {
         public Form1()
         {
+            Opacity = 0;
+            FormBorderStyle = FormBorderStyle.None;
+            WindowState = FormWindowState.Maximized;
 
-            Bitmap p = new Bitmap( "./haikei.jpg" );
-            var workerW = getWorkerW();
-            var b = DLL.SelectObject( workerW, p.GetHbitmap() );
-            var aa = DLL.BitBlt(workerW, 50, 50, p.Width, p.Height, workerW, 0, 0, DLL.TernaryRasterOperations.SRCCOPY);
-            Console.WriteLine( b );
-            DLL.DeleteDC( workerW );
 
             Timer timer = new Timer()
             {
-                Interval = 13,
+                Interval = 1000 / 30,
                 Enabled = true
             };
             timer.Tick += Update;
             Paint += Draw;
         }
-        private IntPtr getWorkerW()
+        private IntPtr[] getWindow()
         {
-            var workerw = IntPtr.Zero;
+            DLL.SendMessageTimeout(DLL.FindWindow("Progman", null), 0x052C, new IntPtr(0), IntPtr.Zero, 0x0, 1000, out var result);
+
+            var hoge = new IntPtr[2];
             DLL.EnumWindows((h, l) =>
             {
                 var shell = DLL.FindWindowEx( h, IntPtr.Zero, "SHELLDLL_DefView", null );
-                if(shell != null)
+                if(shell != IntPtr.Zero)
                 {
-                    workerw = DLL.FindWindowEx( IntPtr.Zero, h, "WorkerW", null );
+                    hoge[0] = DLL.FindWindowEx( IntPtr.Zero, h, "WorkerW", null );
+                }
+                var c = DLL.FindWindowEx(h, IntPtr.Zero, "Chrome_RenderWidgetHostHWND", null);
+                if (c != IntPtr.Zero)
+                {
+                    hoge[1] = DLL.FindWindowEx(IntPtr.Zero, h, "Chrome_WidgetWin_1", null);
                 }
                 return true;
             },IntPtr.Zero);
-            return workerw;
+            return hoge;
         }
+
         private void Draw(object sender, PaintEventArgs e)
         {
+            
         }
 
         private void Update(object sender, EventArgs e)
         {
+            var window = getWindow();
+            var hdc = DLL.GetDCEx(window[0], IntPtr.Zero, 0x403);
+            var chromeDC = DLL.GetDCEx(window[1], IntPtr.Zero, 0x403);
+
+            Console.WriteLine( chromeDC );
+            DLL.BitBlt( hdc, 0, 0, 1980, 1080, chromeDC, 0, 0, DLL.TernaryRasterOperations.SRCCOPY );
             Invalidate();
+            DLL.ReleaseDC( window[0], hdc );
+            DLL.ReleaseDC( window[1], chromeDC );
         }
 
     }
