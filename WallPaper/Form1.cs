@@ -12,18 +12,20 @@ namespace WallPaper
     {
         public Form1()
         {
+            DoubleBuffered = true;
             Opacity = 0;
             FormBorderStyle = FormBorderStyle.None;
             WindowState = FormWindowState.Maximized;
 
-
+            MediaPlayer player = new MediaPlayer();
+            player.Open( new Uri(@"C:\Users\grady\Videos\Captures\are.mp4") );
+            player.Play();
             Timer timer = new Timer()
             {
                 Interval = 1000 / 30,
                 Enabled = true
             };
             timer.Tick += Update;
-            Paint += Draw;
         }
         private IntPtr[] getWindow()
         {
@@ -47,22 +49,17 @@ namespace WallPaper
             return hoge;
         }
 
-        private void Draw(object sender, PaintEventArgs e)
-        {
-            
-        }
-
         private void Update(object sender, EventArgs e)
         {
             var window = getWindow();
             var hdc = DLL.GetDCEx(window[0], IntPtr.Zero, 0x403);
-            var chromeDC = DLL.GetDCEx(window[1], IntPtr.Zero, 0x403);
+            var chromeDC = DLL.GetDCEx(Handle, IntPtr.Zero, 0x403);
 
             Console.WriteLine( chromeDC );
-            DLL.BitBlt( hdc, 0, 0, 1980, 1080, chromeDC, 0, 0, DLL.TernaryRasterOperations.SRCCOPY );
+            DLL.BitBlt( hdc, 0, 0, 1980, 1280, chromeDC, 0, 0, DLL.TernaryRasterOperations.SRCCOPY );
             Invalidate();
             DLL.ReleaseDC( window[0], hdc );
-            DLL.ReleaseDC( window[1], chromeDC );
+            DLL.ReleaseDC( Handle, chromeDC );
         }
 
     }
