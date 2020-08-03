@@ -4,7 +4,6 @@ using System.Windows.Forms;
 using System.Windows.Interop;
 using System.Drawing;
 using System.Windows.Media;
-using Color = System.Drawing.Color;
 
 namespace WallPaper
 {
@@ -16,10 +15,10 @@ namespace WallPaper
             Opacity = 0;
             FormBorderStyle = FormBorderStyle.None;
             WindowState = FormWindowState.Maximized;
+            Screen.GetBounds(this);
+            BackgroundImage = new Bitmap(new Bitmap(@"./annna.jpg"), new Size(Bounds.Width, Bounds.Height));
 
             MediaPlayer player = new MediaPlayer();
-            player.Open( new Uri(@"C:\Users\grady\Videos\Captures\are.mp4") );
-            player.Play();
             Timer timer = new Timer()
             {
                 Interval = 1000 / 30,
@@ -54,8 +53,6 @@ namespace WallPaper
             var window = getWindow();
             var hdc = DLL.GetDCEx(window[0], IntPtr.Zero, 0x403);
             var chromeDC = DLL.GetDCEx(Handle, IntPtr.Zero, 0x403);
-
-            Console.WriteLine( chromeDC );
             DLL.BitBlt( hdc, 0, 0, 1980, 1280, chromeDC, 0, 0, DLL.TernaryRasterOperations.SRCCOPY );
             Invalidate();
             DLL.ReleaseDC( window[0], hdc );
