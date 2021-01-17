@@ -15,13 +15,17 @@ namespace WallPaper
             Opacity = 0;
             FormBorderStyle = FormBorderStyle.None;
             WindowState = FormWindowState.Maximized;
+
+            StartPosition = FormStartPosition.CenterScreen;
+            Location = Screen.AllScreens[1].Bounds.Location;
+
             Screen.GetBounds(this);
-            BackgroundImage = new Bitmap(new Bitmap(@"./annna.jpg"), new Size(Bounds.Width, Bounds.Height));
+            //BackgroundImage = new Bitmap(new Bitmap(@"./annna.jpg"), new Size(Bounds.Width, Bounds.Height));
 
             MediaPlayer player = new MediaPlayer();
             Timer timer = new Timer()
             {
-                Interval = 1000 / 30,
+                Interval = 1000 / 60,
                 Enabled = true
             };
             timer.Tick += Update;
@@ -38,10 +42,10 @@ namespace WallPaper
                 {
                     hoge[0] = DLL.FindWindowEx( IntPtr.Zero, h, "WorkerW", null );
                 }
-                var c = DLL.FindWindowEx(h, IntPtr.Zero, "Chrome_RenderWidgetHostHWND", null);
+                var c = DLL.FindWindowEx( h, IntPtr.Zero, "Chrome_WidgetWin_1", null);
                 if (c != IntPtr.Zero)
                 {
-                    hoge[1] = DLL.FindWindowEx(IntPtr.Zero, h, "Chrome_WidgetWin_1", null);
+                    hoge[1] = c;
                 }
                 return true;
             },IntPtr.Zero);
@@ -52,8 +56,8 @@ namespace WallPaper
         {
             var window = getWindow();
             var hdc = DLL.GetDCEx(window[0], IntPtr.Zero, 0x403);
-            var chromeDC = DLL.GetDCEx(Handle, IntPtr.Zero, 0x403);
-            DLL.BitBlt( hdc, 0, 0, 1980, 1280, chromeDC, 0, 0, DLL.TernaryRasterOperations.SRCCOPY );
+            var chromeDC = DLL.GetDCEx(DLL.GetForegroundWindow(), IntPtr.Zero, 0x403);
+            DLL.BitBlt( hdc, Math.Abs(Screen.AllScreens[1].Bounds.X), Math.Abs(Screen.AllScreens[1].Bounds.Y), 3000, 1280, chromeDC, 0, 0, DLL.TernaryRasterOperations.SRCCOPY );
             Invalidate();
             DLL.ReleaseDC( window[0], hdc );
             DLL.ReleaseDC( Handle, chromeDC );
