@@ -83,5 +83,7 @@ namespace WallPaper
         public static extern bool DeleteDC(IntPtr hdc);
         [DllImport("gdi32.dll", ExactSpelling = true, SetLastError = true)]
         public static extern IntPtr SelectObject(IntPtr hdc, IntPtr hgdiobj);
+        [DllImport("user32.dll")]
+        public static extern short GetAsyncKeyState(System.Windows.Forms.Keys vKey);
     }
 }
