@@ -16,6 +16,8 @@ namespace WallPaper
         Point ballPoint = new Point(100, 200);
         Point Vector = new Point( 8, 15 );
 
+        Bitmap myWall;
+
         NotifyIcon NotifyIcon;
 
         bool isEnd = false;
@@ -62,18 +64,21 @@ namespace WallPaper
             {
                 if (isEnd)
                 {
-                    SetKawaii();
+                    Close();
                     Environment.Exit(0);
                     return;
                 }
-
+                e.Graphics.DrawImage(myWall,0,-100);
                 for(int i = 0; i < drawStrings.Count; i++) drawStrings[i].Draw(e);
-                
             };
+
+            var a = new Bitmap("./kawaii.png");
+            myWall = new Bitmap(a, new Size(1920, (int)(a.Height * (1920f / a.Width))));
 
         }
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
+            SetKawaii();
             keyboardHook.UnHook();
         }
 
@@ -116,11 +121,11 @@ namespace WallPaper
 
             var window = getWindow();
             var hdc = DLL.GetDCEx(window[0], IntPtr.Zero, 0x403);
-            var chromeDC = DLL.GetDCEx(Handle, IntPtr.Zero, 0x403);
-            DLL.BitBlt( hdc, Math.Abs(Screen.AllScreens[1].Bounds.X), Math.Abs(Screen.AllScreens[1].Bounds.Y), 3000, 1280, chromeDC, 0, 0, DLL.TernaryRasterOperations.SRCCOPY );
-            Invalidate();
+            var formDC = DLL.GetDCEx(Handle, IntPtr.Zero, 0x403);
+            DLL.BitBlt( hdc, Math.Abs(Screen.AllScreens[1].Bounds.X), Math.Abs(Screen.AllScreens[1].Bounds.Y), 3000, 1280, formDC, 0, 0, DLL.TernaryRasterOperations.SRCCOPY );
             DLL.ReleaseDC( window[0], hdc );
-            DLL.ReleaseDC( Handle, chromeDC );
+            DLL.ReleaseDC( Handle, formDC );
+            Invalidate();
         }
 
         private void AddTask()
@@ -161,13 +166,10 @@ namespace WallPaper
 
         private void SetKawaii()
         {
-            var a = new Bitmap("./kawaii.png");
-            var b = new Bitmap(a, new Size(1920, (int)(a.Height * (1920f / a.Width))));
-
             var window = getWindow();
             var hdc = DLL.GetDCEx(window[0], IntPtr.Zero, 0x403);
             var hsrc = DLL.CreateCompatibleDC(hdc);
-            var porg = DLL.SelectObject(hsrc,b.GetHbitmap());
+            var porg = DLL.SelectObject(hsrc,myWall.GetHbitmap());
             DLL.BitBlt(hdc, Math.Abs(Screen.AllScreens[1].Bounds.X), Math.Abs(Screen.AllScreens[1].Bounds.Y) - 100, 3000, 1280, hsrc, 0, 0, DLL.TernaryRasterOperations.SRCCOPY);
         }
 
